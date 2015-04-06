@@ -23,6 +23,13 @@
        (reduce do-compose {:before-each noop
                            :after-each noop}))))
 
+(defn wrap-test
+  [before actual-test after]
+  (fn []
+    (before)
+    (actual-test)
+    (after)))
+
 (defn- emit-definition-wrapper
   [definitions before-each after-each]
   (for [definition definitions]
@@ -30,10 +37,10 @@
            test# (:test (meta test-var#))]
        (alter-meta! test-var#
                     assoc
-                    :test (fn []
-                            (~before-each)
-                            (test#)
-                            (~after-each)))
+                    :test (wrap-test
+                            ~before-each
+                            test#
+                            ~after-each))
        test-var#)
     )
   )

@@ -25,21 +25,32 @@
       (is (= [:after-each-1 :after-each-2]
              @calls)))))
 
+(deftest wrap-test
+  (let [calls (atom [])
+        before-each (register-call calls :before-each)
+        the-test (register-call calls :the-test)
+        after-each (register-call calls :after-each)
+        wrapped-test (test-util/wrap-test before-each the-test after-each)]
+    (wrapped-test)
+    (is (= [:before-each :the-test :after-each] @calls))))
+
 (def before-each-calls (atom []))
 (test-util/fixture
-  before-each
+  before-each-dummy
   [:before-each (register-call before-each-calls :before-each-1)
    :before-each (register-call before-each-calls :before-each-2)]
 
-  (deftest before-each-fixture
-    (is (= [:before-each-1 :before-each-2] @before-each-calls))))
+  (deftest before-each-fixture-prep
+    (is (= 1 1))))
 
-;; Since the after-each fixtures won't be called until the test passed
-;; we can't test this from within the test itself. We therefore write a
-;; dummy test, which we call again in the follwoing test.
+(deftest before-each-fixture
+  (reset! before-each-calls [])
+  (before-each-fixture-prep)
+  (is (= [:before-each-1 :before-each-2] @before-each-calls)))
+
 (def after-each-calls (atom []))
 (test-util/fixture
-  after-each-prep
+  after-each-dummy
   [:after-each (register-call after-each-calls :after-each-1)
    :after-each (register-call after-each-calls :after-each-2)]
   (deftest after-each-fixture-prep
