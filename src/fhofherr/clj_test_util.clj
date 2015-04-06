@@ -43,9 +43,7 @@
                             ~before-each
                             test#
                             ~after-each))
-       test-var#)
-    )
-  )
+       test-var#)))
 
 (defmacro fixture
   "TODO: multiple before each fixtures ==> in definition order
@@ -68,5 +66,4 @@
     `(let [~fixtures (compose-fixtures ~fixture-fns)
            ~before-each (:before-each ~fixtures)
            ~after-each (:after-each ~fixtures)]
-       ~@(emit-definition-wrapper definitions before-each after-each)
-       )))
+       ~@(emit-definition-wrapper definitions before-each after-each))))
