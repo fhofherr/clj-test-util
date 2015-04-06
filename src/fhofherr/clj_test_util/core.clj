@@ -16,25 +16,24 @@
        test-var#)))
 
 (defmacro fixture
-  "TODO: multiple before each fixtures ==> in definition order
-  TODO: multiple after each fixtures ==> in definition order
-  TODO: multiple arount each fixtures ==> in definition order
-  TODO: mixture of before, after, around each ==> before-each first,
-  then around-each, then after-each
-  TODO: after each even if around hook, or test itself fail
+  "Create a test fixture for the given `definitions`.
 
-  TODO: be carefull if befor each fails, nothing else will be executed (danger
-  if using multiple before hooks)
-  "
-  [fixture-name fixture-fns & definitions]
+  The bindings vector may contain `:before-each`, `:after-each` and
+  `:around-each` fixture functions. The `:before-each` functions will be called
+  before each test in `definitions`. The `:after-each` functions will be called
+  after each test in `definitions`. The `:around-each` functions will be called
+  around each test in `definitions`. If multiple `:before-each`, `:after-each`,
+  or `:around-each` functions are given they will be called in the order they
+  are listed."
+  [fixture-name bindings & definitions]
   ;; TODO IllegalArgumnentException
-  (assert (even? (count fixture-fns))
-          "fixture requires an even number of definitions in fixture-fns!")
+  (assert (even? (count bindings))
+          "fixture requires an even number of definitions in bindings")
   (let [fixtures (gensym "fixtures")
         before-each (gensym "before-each")
         after-each (gensym "after-each")
         around-each (gensym "around-each")]
-    `(let [~fixtures (compose-fixtures ~fixture-fns)
+    `(let [~fixtures (compose-fixtures ~bindings)
            ~before-each (:before-each ~fixtures)
            ~after-each (:after-each ~fixtures)
            ~around-each (:around-each ~fixtures)]
