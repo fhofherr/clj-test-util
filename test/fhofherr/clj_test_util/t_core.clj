@@ -1,6 +1,6 @@
-(ns fhofherr.t-clj-test-util
+(ns fhofherr.clj-test-util.t-core
   (:require [clojure.test :refer :all]
-            [fhofherr.clj-test-util :as test-util]))
+            [fhofherr.clj-test-util.core :as test-util]))
 
 (defn- register-call
   ([calls kw]

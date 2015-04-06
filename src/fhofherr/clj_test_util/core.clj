@@ -1,4 +1,4 @@
-(ns fhofherr.clj-test-util)
+(ns fhofherr.clj-test-util.core)
 
 (defn- noop
   [])

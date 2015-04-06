@@ -6,7 +6,7 @@
 
 (defn- do-test
   []
-  (t/run-all-tests #"fhofherr\.t-.+"))
+  (t/run-all-tests #"fhofherr\.clj-test-util\.t-.+"))
 
 (defn refresh-test
   []
