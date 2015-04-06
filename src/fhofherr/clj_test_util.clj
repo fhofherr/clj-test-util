@@ -27,8 +27,10 @@
   [before actual-test after]
   (fn []
     (before)
-    (actual-test)
-    (after)))
+    (try
+      (actual-test)
+      (finally
+        (after)))))
 
 (defn- emit-definition-wrapper
   [definitions before-each after-each]

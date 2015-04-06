@@ -26,13 +26,26 @@
              @calls)))))
 
 (deftest wrap-test
-  (let [calls (atom [])
-        before-each (register-call calls :before-each)
-        the-test (register-call calls :the-test)
-        after-each (register-call calls :after-each)
-        wrapped-test (test-util/wrap-test before-each the-test after-each)]
-    (wrapped-test)
-    (is (= [:before-each :the-test :after-each] @calls))))
+
+  (testing "wrap tests in before and after"
+    (let [calls (atom [])
+          before-each (register-call calls :before-each)
+          the-test (register-call calls :the-test)
+          after-each (register-call calls :after-each)
+          wrapped-test (test-util/wrap-test before-each the-test after-each)]
+      (wrapped-test)
+      (is (= [:before-each :the-test :after-each] @calls))))
+
+  (testing "after is executed even if the test fails"
+    (let [calls (atom [])
+          before-each (register-call calls :before-each)
+          failing-test (fn [] (throw (Throwable. "Ooops!")))
+          after-each (register-call calls :after-each)
+          wrapped-test (test-util/wrap-test before-each failing-test after-each)]
+      (try
+        (wrapped-test)
+        (catch Throwable _))
+      (is (= [:before-each :after-each] @calls)))))
 
 (def before-each-calls (atom []))
 (test-util/fixture
