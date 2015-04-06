@@ -1,5 +1,26 @@
 (ns fhofherr.clj-test-util)
 
+(defn- noop
+  [])
+
+(defn- chain-fns
+  [f1 f2]
+  (fn []
+    (f1)
+    (f2)))
+
+(defn compose-fixtures
+  [fixtures]
+  (let [composers {:before-each chain-fns}
+        do-compose (fn [acc [fixture-type f]]
+                     (as-> acc $
+                       (fixture-type $)
+                       ((fixture-type composers) $ f)
+                       (assoc acc fixture-type $)))]
+    (->> fixtures
+       (partition 2)
+       (reduce do-compose {:before-each noop}))))
+
 (defmacro fixture
   "TODO: multiple before each fixtures ==> in definition order
   TODO: multiple after each fixtures ==> in definition order
@@ -15,14 +36,16 @@
   ;; TODO IllegalArgumnentException
   (assert (even? (count fixture-fns))
           "fixture requires an even number of definitions in fixture-fns!")
-  (let [before-fixture (gensym "before-fixture")]
-    `(let [~before-fixture ~(second fixture-fns)]
+  (let [fixtures (gensym "fixtures")
+        before-each (gensym "before-each")]
+    `(let [~fixtures (compose-fixtures ~fixture-fns)
+           ~before-each (:before-each ~fixtures)]
        ~@(for [definition definitions]
            `(let [test-var# ~definition
                   test# (:test (meta test-var#))]
               (alter-meta! test-var#
                            assoc
-                           :test (fn [] (~before-fixture) (test#)))
+                           :test (fn [] (~before-each) (test#)))
               test-var#)
            )
        )))
