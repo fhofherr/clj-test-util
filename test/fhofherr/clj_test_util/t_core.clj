@@ -3,6 +3,11 @@
             [fhofherr.clj-test-util.core :as test-util]
             [fhofherr.clj-test-util.core.utils :as utils]))
 
+;; The following test test the fixture macro. Since the fixture
+;; macro modifies the test functions created by deftest we definie
+;; dummy tests within the fixture macro. Those dummy tests are then
+;; called from tests outside of the fixture macro.
+
 (defn- register-call
   ([calls kw]
    (fn [] (swap! calls conj kw)))
