@@ -3,6 +3,62 @@
             [fhofherr.clj-test-util.core :as test-util]
             [fhofherr.clj-test-util.core.utils :as utils]))
 
+(deftest check-fulfillment-of-expectations
+
+  (testing "use values as expectations"
+    (is (true? (test-util/fulfills? 1 1)))
+    (is (false? (test-util/fulfills? 1 2))))
+
+  (testing "use functions as expectations"
+    (is (true? (test-util/fulfills? #(= % 1) 1)))
+    (is (false? (test-util/fulfills? #(= % 1) 2))))
+
+  (testing "use collections as expectations"
+    (is (true? (test-util/fulfills? [1] [1])))
+    (is (true? (test-util/fulfills? (list 1) (list 1))))
+    (is (true? (test-util/fulfills? (seq [1]) (seq [1]))))
+    (is (false? (test-util/fulfills? [1] [2])))
+    (is (false? (test-util/fulfills? (list 1) (list 2))))
+    (is (false? (test-util/fulfills? (seq [1]) (seq [2]))))
+    (is (true? (test-util/fulfills? {:key "value"} {:key "value"})))
+    (is (true? (test-util/fulfills? {:key #(= % "value")} {:key "value"})))
+    (is (false? (test-util/fulfills? {:key "value"} {:wrong-key "value"})))
+    (is (false? (test-util/fulfills? {:key "value"} {:key "wrong-value"})))
+
+    (is (true? (test-util/fulfills? [#(= % 1)] [1])))
+    (is (false? (test-util/fulfills? [#(= % 1)] [2]))))
+
+  (testing "there may be less expectations than candidates"
+    (is (true? (test-util/fulfills? [1] [1 2])))
+    (is (false? (test-util/fulfills? [2] [1 2])))
+    (is (true? (test-util/fulfills? {:key "value"}
+                                    {:key "value" :another-key "something"}))))
+
+  (testing "when comparing collections candidates must be a collection too"
+    (is (thrown? IllegalArgumentException (test-util/fulfills? [1] 1)))
+    (is (thrown? IllegalArgumentException (test-util/fulfills? {:key 1} 1))))
+
+  (testing "there must not be less candidates than expectations"
+    (is (thrown? IllegalArgumentException (test-util/fulfills? [1 2] [1])))
+    (is (thrown? IllegalArgumentException (test-util/fulfills? {:key 2} {})))))
+
+;; The following test test the fixture macro. Since the fixture
+;; macro modifies the test functions created by deftest we definie
+;; dummy tests within the fixture macro. Those dummy tests are then
+;; called from tests outside of the fixture macro.
+
+(defn- register-call
+  ([calls kw]
+   (fn [] (swap! calls conj kw)))
+
+  ([calls before-kw after-kw]
+   (fn [f]
+     (swap! calls conj before-kw)
+     (f)
+     (swap! calls conj after-kw))))
+
+(def before-each-calls (atom []))
+
 ;; The following test test the fixture macro. Since the fixture
 ;; macro modifies the test functions created by deftest we definie
 ;; dummy tests within the fixture macro. Those dummy tests are then

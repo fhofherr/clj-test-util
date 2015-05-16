@@ -1,5 +1,44 @@
 (ns fhofherr.clj-test-util.core
-  (:require [fhofherr.clj-test-util.core.utils :refer :all]))
+  (:require [clojure.test :refer [function?]]
+            [fhofherr.clj-test-util.core.utils :refer :all]))
+
+(defmulti fulfills?
+  (fn [expectation candidate]
+    (when (and
+            (coll? expectation)
+            (coll? candidate)
+            (< (count candidate) (count expectation)))
+      (throw (IllegalArgumentException.
+               "There must not be less candidates than expectations")))
+    (cond
+      (function? expectation) ::predicate
+      (sequential? expectation) ::sequential
+      (map? expectation) ::map
+      :else (class expectation)))
+  :default ::default)
+
+(defmethod fulfills? ::predicate
+  [expectation candidate]
+  (expectation candidate))
+
+(defmethod fulfills? ::sequential
+  [expectation candidate]
+  (when (not (sequential? candidate))
+    (throw (IllegalArgumentException.
+             "Can't compare sequential expectations to non-sequential candidates!")))
+  (every? true? (map fulfills? expectation candidate)))
+
+(defmethod fulfills? ::map
+  [expectation candidate]
+  (when (not (map? candidate))
+    (throw (IllegalArgumentException.
+             "Can't compare map expectations to non-map candidates!")))
+  (every? true? (for [[k e] expectation]
+                  (fulfills? e (get candidate k ::missing-candidate-value)))))
+
+(defmethod fulfills? ::default
+  [expectation candidate]
+  (= expectation candidate))
 
 (defn- emit-definition-wrapper
   [definitions before-each around-each after-each]
