@@ -23,11 +23,16 @@
   candidates are ignored. However, there may not be more expectations than
   candidates.
 
+  Sets as expectations are a special case. If a set is given as a candidate
+  the `expectation` and `candidate` are compared using `=`. If `candidate`
+  is something else it is checked if `expectation` contains the candidate. 
+
   Returns `true` if the `candidate` fulfills the `expectation` and `false` if
   it does not."
   (fn [expectation candidate]
     (when (and
             (coll? expectation)
+            (not (set? expectation))
             (coll? candidate)
             (< (count candidate) (count expectation)))
       (throw (IllegalArgumentException.
@@ -36,6 +41,7 @@
       (function? expectation) ::predicate
       (sequential? expectation) ::sequential
       (map? expectation) ::map
+      (set? expectation) ::set
       :else (class expectation)))
   :default ::default)
 
@@ -57,6 +63,12 @@
              "Can't compare map expectations to non-map candidates!")))
   (every? true? (for [[k e] expectation]
                   (fulfills? e (get candidate k ::missing-candidate-value)))))
+
+(defmethod fulfills? ::set
+  [expectation candidate]
+  (if (set? candidate)
+    (= expectation candidate)
+    (contains? expectation candidate)))
 
 (defmethod fulfills? ::default
   [expectation candidate]

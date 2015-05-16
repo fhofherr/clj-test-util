@@ -25,6 +25,12 @@
     (is (false? (test-util/fulfills? {:key "value"} {:wrong-key "value"})))
     (is (false? (test-util/fulfills? {:key "value"} {:key "wrong-value"})))
 
+    (is (true? (test-util/fulfills? #{:a :b} :a)))
+    (is (true? (test-util/fulfills? #{[:a] [:b]} [:a])))
+    (is (false? (test-util/fulfills? #{:a :b} :c)))
+    (is (true? (test-util/fulfills? #{:a :b} #{:a :b})))
+    (is (false? (test-util/fulfills? #{:a :b} #{:c :d})))
+
     (is (true? (test-util/fulfills? [#(= % 1)] [1])))
     (is (false? (test-util/fulfills? [#(= % 1)] [2]))))
 
