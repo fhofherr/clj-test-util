@@ -1,5 +1,7 @@
 (ns fhofherr.clj-test-util.core
-  (:require [clojure.test :refer [function?]]
+  (:require [clojure.test :refer [assert-expr
+                                  do-report
+                                  function?]]
             [fhofherr.clj-test-util.core.utils :refer :all]))
 
 (defmulti fulfills?
@@ -39,6 +41,16 @@
 (defmethod fulfills? ::default
   [expectation candidate]
   (= expectation candidate))
+
+(defmethod assert-expr 'fulfilled?
+  [msg form]
+  (let [[_ expectation-form candidate-form] form]
+    `(if (fulfills? ~expectation-form ~candidate-form)
+       (do-report {:type :pass :message ~msg})
+       (do-report {:type :fail
+                   :message ~msg
+                   :expected '~form
+                   :actual '~(list 'not form)}))))
 
 (defn- emit-definition-wrapper
   [definitions before-each around-each after-each]

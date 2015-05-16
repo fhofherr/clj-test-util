@@ -42,6 +42,12 @@
     (is (thrown? IllegalArgumentException (test-util/fulfills? [1 2] [1])))
     (is (thrown? IllegalArgumentException (test-util/fulfills? {:key 2} {})))))
 
+(deftest is-fulfilled
+  (is (fulfilled? 1 1))
+  (is (fulfilled? true? true))
+  (is (fulfilled? [1 #(= % 2)] [1 2]))
+  (is (fulfilled? {:key true?} {:key true})))
+
 ;; The following test test the fixture macro. Since the fixture
 ;; macro modifies the test functions created by deftest we definie
 ;; dummy tests within the fixture macro. Those dummy tests are then
