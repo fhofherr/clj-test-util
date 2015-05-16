@@ -5,6 +5,26 @@
             [fhofherr.clj-test-util.core.utils :refer :all]))
 
 (defmulti fulfills?
+  "Check if a `candidate` fulfills an `expectation`.
+
+  Expectations can be given as values, functions, or collections
+
+  Values will be compared using `=`.
+
+  Functions are assumed to be predicates. They are applied to the `candidate`.
+  If the function returns `true` the `candidate` fulfills the expectation.
+
+  If a collection is given as `expectation` it is treated as a collection of
+  expectations. In this case `candidate` must be a collection, too. For
+  sequential collections of expectations each expectation is checked against
+  the candidate value at the same position of the candidate collection. If
+  `expectation` is a map expectations are checked against candidates with the
+  same key. If there are more candidates than expectations, addiditional
+  candidates are ignored. However, there may not be more expectations than
+  candidates.
+
+  Returns `true` if the `candidate` fulfills the `expectation` and `false` if
+  it does not."
   (fn [expectation candidate]
     (when (and
             (coll? expectation)
