@@ -4,8 +4,10 @@
   :license {:name "MIT"
             :url "http://opensource.org/licenses/MIT"}
   :dependencies [[org.clojure/clojure "1.6.0"]]
-  :plugins [[codox "0.8.11"]]
-  :codox {:output-dir "target/codox"
+  :plugins [[codox "0.8.12"]]
+  :codox {:src-dir-uri "https://github.com/fhofherr/clj-test-util/blob/master/"
+          :src-linenum-anchor-prefix "L"
+          :output-dir "target/codox"
           :exclude [user]
           :defaults {:doc/format :markdown}}
   :profiles {:dev {:source-paths ["dev"]
